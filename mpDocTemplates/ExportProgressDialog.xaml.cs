@@ -6,7 +6,6 @@
 
     public partial class ExportProgressDialog
     {
-        private const string LangItem = "mpDocTemplates";
         readonly BackgroundWorker _backgroundWorker = new BackgroundWorker
         {
             WorkerSupportsCancellation = true,
@@ -36,7 +35,7 @@
             ProgressBar.Value = e.ProgressPercentage;
 
             // Процент в виде текста
-            TbProgress.Text = e.ProgressPercentage.ToString(CultureInfo.InvariantCulture) + "%";
+            TbProgress.Text = $"{e.ProgressPercentage.ToString(CultureInfo.InvariantCulture)}%";
 
             // Что сейчас делаем
             TbCurrentWorkLabel.Text = e.UserState as string;
@@ -44,7 +43,7 @@
 
         private void BtCancel_OnClick(object sender, RoutedEventArgs e)
         {
-            TbCurrentWorkLabel.Text = ModPlusAPI.Language.GetItem(LangItem, "h18") + "...";
+            TbCurrentWorkLabel.Text = $"{ModPlusAPI.Language.GetItem("h18")}...";
             _backgroundWorker.CancelAsync(); // Tell worker to abort.
             BtCancel.IsEnabled = false;
         }

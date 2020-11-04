@@ -21,7 +21,7 @@
     using AcApp = Autodesk.AutoCAD.ApplicationServices.Core.Application;
     using Visibility = System.Windows.Visibility;
 
-    public partial class MpDocTemplate
+    public partial class MainWindow
     {
         private const string LangItem = "mpDocTemplates";
 
@@ -41,7 +41,7 @@
             "zG9"
         };
 
-        public MpDocTemplate()
+        public MainWindow()
         {
             InitializeComponent();
             Title = ModPlusAPI.Language.GetItem(LangItem, "h1");
@@ -93,7 +93,7 @@
                 TemplateData.FillLinItems(_linDocs);
                 LbLin.ItemsSource = _linDocs;
             }
-            catch (System.Exception exception)
+            catch (Exception exception)
             {
                 ExceptionBox.Show(exception);
             }
@@ -115,7 +115,7 @@
                     UserConfigFile.SaveConfigFile();
                 }
             }
-            catch (System.Exception exception)
+            catch (Exception exception)
             {
                 ExceptionBox.Show(exception);
             }
@@ -134,20 +134,20 @@
                         _textBoxes[i].Text = dbsib.CustomPropertyTable[_fieldNames[i]].ToString();
                 }
             }
-            catch (System.Exception exception)
+            catch (Exception exception)
             {
                 ExceptionBox.Show(exception);
             }
         }
 
-        private System.Exception _error;
+        private Exception _error;
         private bool _hasError;
         private List<string> _fileToDelete;
 
         // Создать
         private void BtCreate_OnClick(object sender, RoutedEventArgs e)
         {
-            _error = new System.Exception(); // Ошибка, возможная при асинхронной работе
+            _error = new Exception(); // Ошибка, возможная при асинхронной работе
             _fileToDelete = new List<string>(); // Список файлов на удаление
             if (!_kapDocs.Any(x => x.Create) & !_linDocs.Any(x => x.Create))
             {
@@ -161,7 +161,7 @@
                 TbDescription.Text,
                 TbGIP.Text, TbEngineer.Text,
                 TbEmployer.Text.Split(' ').GetValue(0).ToString(),
-                DateTime.Now.Year.ToString(CultureInfo.InvariantCulture) + " г.",
+                $"{DateTime.Now.Year.ToString(CultureInfo.InvariantCulture)} г.",
                 TbNumProj.Text, TbController.Text.Split(' ').GetValue(0).ToString(),
                 TbOrganization.Text, TbResolution.Text, TbCustomer.Text
             };
@@ -227,14 +227,15 @@
                     break;
                 }
 
-                worker?.ReportProgress(0, ModPlusAPI.Language.GetItem(LangItem, "h22") + ": " + ModPlusAPI.Language.GetItem(LangItem, "h15") + ": " + kapDoc.Name);
+                worker?.ReportProgress(0,
+                    $"{ModPlusAPI.Language.GetItem(LangItem, "h22")}: {ModPlusAPI.Language.GetItem(LangItem, "h15")}: {kapDoc.Name}");
 
                 // Временный файл
                 var tmp = Path.GetTempFileName();
                 var templateFullPath = Path.ChangeExtension(tmp, ".docx");
 
                 // Имя внедренного ресурса
-                var resourceName = "mpDocTemplates.Resources.Kap." + kapDoc.Name + ".docx";
+                var resourceName = $"mpDocTemplates.Resources.Kap.{kapDoc.Name}.docx";
 
                 // Читаем ресурс в поток и сохраняем как временный файл
                 using (Stream stream = assembly.GetManifestResourceStream(resourceName))
@@ -259,18 +260,18 @@
 
                             worker?.ReportProgress(
                                 Convert.ToInt32((decimal)i / toFind.Count * 100),
-                                ModPlusAPI.Language.GetItem(LangItem, "h22") + ": " + ModPlusAPI.Language.GetItem(LangItem, "h15") + ": " + kapDoc.Name);
+                                $"{ModPlusAPI.Language.GetItem(LangItem, "h22")}: {ModPlusAPI.Language.GetItem(LangItem, "h15")}: {kapDoc.Name}");
                             flatDocument.FindAndReplace(toFind[i], _toReplace[i]);
                             Thread.Sleep(50);
                         }
                     }
 
                     // Создаем документ, используя временный файл
-                    worker?.ReportProgress(0, 
-                        ModPlusAPI.Language.GetItem(LangItem, "h23") + ": " + ModPlusAPI.Language.GetItem(LangItem, "h15") + ": " + kapDoc.Name);
+                    worker?.ReportProgress(0,
+                        $"{ModPlusAPI.Language.GetItem(LangItem, "h23")}: {ModPlusAPI.Language.GetItem(LangItem, "h15")}: {kapDoc.Name}");
                     wordAutomation.CreateWordDoc(templateFullPath, true);
                 }
-                catch (System.Exception exception)
+                catch (Exception exception)
                 {
                     // Если словили ошибку, то закрываем ворд
                     wordAutomation.CloseWordApp();
@@ -289,14 +290,14 @@
                 }
 
                 worker?.ReportProgress(0,
-                    ModPlusAPI.Language.GetItem(LangItem, "h22") + ": " + ModPlusAPI.Language.GetItem(LangItem, "h16") + ": " + linDoc.Name);
+                    $"{ModPlusAPI.Language.GetItem(LangItem, "h22")}: {ModPlusAPI.Language.GetItem(LangItem, "h16")}: {linDoc.Name}");
 
                 // Временный файл
                 var tmp = Path.GetTempFileName();
                 var templateFullPath = Path.ChangeExtension(tmp, ".docx");
 
                 // Имя внедренного ресурса
-                var resourceName = "mpDocTemplates.Resources.Lin." + linDoc.Name + ".docx";
+                var resourceName = $"mpDocTemplates.Resources.Lin.{linDoc.Name}.docx";
 
                 // Читаем ресурс в поток и сохраняем как временный файл
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
@@ -321,7 +322,7 @@
 
                             worker?.ReportProgress(
                                 Convert.ToInt32((decimal)i / toFind.Count * 100),
-                                ModPlusAPI.Language.GetItem(LangItem, "h22") + ": " + ModPlusAPI.Language.GetItem(LangItem, "h16") + ": " + linDoc.Name);
+                                $"{ModPlusAPI.Language.GetItem(LangItem, "h22")}: {ModPlusAPI.Language.GetItem(LangItem, "h16")}: {linDoc.Name}");
                             flatDocument.FindAndReplace(toFind[i], _toReplace[i]);
                             Thread.Sleep(50);
                         }
@@ -329,10 +330,10 @@
 
                     // Создаем документ, используя временный файл
                     worker?.ReportProgress(0,
-                        ModPlusAPI.Language.GetItem(LangItem, "h23") + ": " + ModPlusAPI.Language.GetItem(LangItem, "h16") + ": " + linDoc.Name);
+                        $"{ModPlusAPI.Language.GetItem(LangItem, "h23")}: {ModPlusAPI.Language.GetItem(LangItem, "h16")}: {linDoc.Name}");
                     wordAutomation.CreateWordDoc(templateFullPath, true);
                 }
-                catch (System.Exception exception)
+                catch (Exception exception)
                 {
                     // Если словили ошибку, то закрываем ворд
                     wordAutomation.CloseWordApp();

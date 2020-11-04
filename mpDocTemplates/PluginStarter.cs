@@ -3,40 +3,41 @@
     using System;
     using Autodesk.AutoCAD.ApplicationServices.Core;
     using Autodesk.AutoCAD.Runtime;
-    using ModPlusAPI;
 
     /// <summary>
     /// Запуск функции в автокаде
     /// </summary>
-    public class AcadFunction
+    public class PluginStarter
     {
-        MpDocTemplate _mpDocTemplate;
+        MainWindow _mainWindow;
 
         [CommandMethod("ModPlus", "mpDocTemplates", CommandFlags.Modal)]
         public void StartFunction()
         {
-            Statistic.SendCommandStarting(new ModPlusConnector());
+#if !DEBUG
+            ModPlusAPI.Statistic.SendCommandStarting(new ModPlusConnector());
+#endif
 
-            if (_mpDocTemplate == null)
+            if (_mainWindow == null)
             {
-                _mpDocTemplate = new MpDocTemplate();
-                _mpDocTemplate.Closed += Window_Closed;
+                _mainWindow = new MainWindow();
+                _mainWindow.Closed += Window_Closed;
             }
 
-            if (_mpDocTemplate.IsLoaded)
+            if (_mainWindow.IsLoaded)
             {
-                _mpDocTemplate.Activate();
+                _mainWindow.Activate();
             }
             else
             {
                 Application.ShowModalWindow(
-                    Application.MainWindow.Handle, _mpDocTemplate);
+                    Application.MainWindow.Handle, _mainWindow);
             }
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            _mpDocTemplate = null;
+            _mainWindow = null;
         }
     }
 }
